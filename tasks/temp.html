@@ -1,0 +1,40 @@
+<div>
+  <label for="ce">Celcius:</label>
+  <input id="ce" type="number">
+
+  <label for="fa">Fahrenheit:</label>
+  <input id="fa" type="number">
+</div>
+
+<script type="importmap">
+  {
+    "imports": {
+      "rescript/": "/node_modules/rescript/"
+    }
+  }
+</script>
+
+<script type="module">
+  import { TemperatureConverter } from './temp.bs.js';
+
+  let $ce = document.getElementById('ce');
+  let $fa = document.getElementById('fa');
+
+  let bind = state => {
+    $ce.value = state.celsius;
+    $fa.value = state.fahrenheit;
+  };
+
+  let program = TemperatureConverter.make(bind);
+  TemperatureConverter.init(program);
+
+  $ce.onchange = (e) => {
+    let ce = e.currentTarget.value;
+    program = TemperatureConverter.updateCelsius(program, ce);
+  };
+
+  $fa.onchange = (e) => {
+    let fa = e.currentTarget.value;
+    program = TemperatureConverter.updateFahrenheit(program, fa);
+  };
+</script>

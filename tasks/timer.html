@@ -1,0 +1,75 @@
+<div class="container">
+  <label for="progress">Elapsed Time:</label>
+  <progress id="progress" max="100" value="0"></progress>
+
+  <time id="time">0s</time>
+
+  <label for="slider">Duration:</label>
+  <input type="range" id="slider" min="0" max="100">
+
+  <button id="reset">Reset</button>
+</div>
+
+<script type="importmap">
+  {
+    "imports": {
+      "rescript/": "/node_modules/rescript/"
+    }
+  }
+</script>
+
+<script type="module">
+  import { Timer } from './timer.bs.js';
+
+  let $slider = document.getElementById('slider');
+  let $time = document.getElementById('time');
+  let $progress = document.getElementById('progress');
+  let $reset = document.getElementById('reset');
+
+  let handler = null;
+  let program = Timer.make(bind);
+  Timer.init(program);
+
+  function bind(state) {
+    let totalElapsedTime = Timer.State.getTotalElapsedTime(state);
+    let duration = Timer.State.getDuration(state);
+    let canTick = Timer.State.canTick(state);
+
+    $progress.value = Timer.Util.durationToPercent(totalElapsedTime);
+    $slider.value = Timer.Util.durationToPercent(duration);
+    $time.innerText = Timer.Util.formatTime(totalElapsedTime);
+
+    let tick = () => {
+      program = Timer.tick(program, Date.now());
+    };
+
+    if (canTick && !handler) {
+      handler = window.setInterval(tick, 100);
+    }
+    if (!canTick && handler) {
+      window.clearInterval(handler, tick)
+      handler = null;
+    }
+  }
+
+  $slider.oninput = e => {
+    let duration = Timer.Util.percentToDuration(e.target.value);
+    program = Timer.updateDuration(program, Date.now(), duration);
+  }
+
+  $reset.onclick = () => {
+    program = Timer.reset(program, Date.now());
+  }
+</script>
+
+<style>
+  .container {
+    display: grid;
+    gap: 0.5rem;
+    max-width: 20rem;
+  }
+
+  progress {
+    width: 100%;
+  }
+</style>

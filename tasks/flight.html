@@ -1,0 +1,92 @@
+<form>
+  <select id="type">
+    <option value="oneway">One-way flight</option>
+    <option value="returning">Return flight</option>
+  </select>
+
+  <input type="text" id="startDate" />
+  <input type="text" id="endDate" />
+
+  <button type="submit" id="book" disabled>Book</button>
+</form>
+
+<script type="importmap">
+  {
+    "imports": {
+      "rescript/": "/node_modules/rescript/"
+    }
+  }
+</script>
+
+<script type="module">
+  import { FlightBooker, Field } from './flight.bs.js';
+
+  let $form = document.querySelector('form');
+  let $type = document.getElementById('type');
+  let $startDate = document.getElementById('startDate');
+  let $endDate = document.getElementById('endDate');
+  let $book = document.getElementById('book');
+
+  let bind = state => {
+    let type = FlightBooker.State.getType(state);
+    let startDate = FlightBooker.State.getStartDate(state);
+    let endDate = FlightBooker.State.getEndDate(state);
+
+    $form.onsubmit = e => {
+      e.preventDefault();
+      window.alert(`You have booked a ${FlightBooker.Util.formatType(type)} on ${startDate}`);
+    };
+
+    $type.value = type;
+
+    $startDate.value = startDate;
+    if (Field.validate(startDate)) {
+      $startDate.classList.remove('invalid');
+    } else {
+      $startDate.classList.add('invalid');
+    }
+
+    $endDate.value = endDate;
+    $endDate.disabled = (type === 'oneway');
+    if (Field.validate(endDate)) {
+      $endDate.classList.remove('invalid');
+    } else {
+      $endDate.classList.add('invalid');
+    }
+
+    $book.disabled = !(
+      Field.validate(startDate) &&
+      (Field.validate(endDate) || $endDate.disabled)
+    )
+  };
+
+  let program = FlightBooker.make(bind);
+  FlightBooker.init(program);
+
+  $type.onchange = e => {
+    let type = e.currentTarget.value;
+    program = FlightBooker.selectType(program, type);
+  };
+
+  $startDate.onchange = e => {
+    let startDate = e.currentTarget.value;
+    program = FlightBooker.changeStartDate(program, startDate);
+  };
+
+  $endDate.onchange = e => {
+    let endDate = e.currentTarget.value;
+    program = FlightBooker.changeEndDate(program, endDate);
+  };
+</script>
+
+<style>
+  form {
+    display: grid;
+    gap: 0.5rem;
+    max-width: 20rem;
+  }
+
+  .invalid:not(:disabled) {
+    border: 1px solid red;
+  }
+</style>

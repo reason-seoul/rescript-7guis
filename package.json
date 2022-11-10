@@ -1,0 +1,22 @@
+{
+  "name": "rescript-7guis",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "author": {
+    "name": "Hyeseong Kim",
+    "email": "hey@hyeseong.kim"
+  },
+  "scripts": {
+    "serve": "serve",
+    "build": "rescript",
+    "watch": "rescript build -w"
+  },
+  "dependencies": {
+    "rescript": "^10.0.1"
+  },
+  "devDependencies": {
+    "serve": "^14.1.1"
+  },
+  "packageManager": "yarn@3.2.4"
+}
