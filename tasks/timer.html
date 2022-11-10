@@ -26,7 +26,6 @@
   let $progress = document.getElementById('progress');
   let $reset = document.getElementById('reset');
 
-  let handler = null;
   let program = Timer.make(bind);
   Timer.init(program);
 
@@ -39,16 +38,16 @@
     $slider.value = Timer.Util.durationToPercent(duration);
     $time.innerText = Timer.Util.formatTime(totalElapsedTime);
 
+    let ticker = null;
     let tick = () => {
       program = Timer.tick(program, Date.now());
     };
-
-    if (canTick && !handler) {
-      handler = window.setInterval(tick, 100);
+    if (canTick && !ticker) {
+      ticker = window.setInterval(tick, 100);
     }
-    if (!canTick && handler) {
-      window.clearInterval(handler, tick)
-      handler = null;
+    if (!canTick && ticker) {
+      window.clearInterval(ticker, tick)
+      ticker = null;
     }
   }
 
