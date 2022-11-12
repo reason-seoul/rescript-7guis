@@ -1,6 +1,7 @@
 {
   "name": "rescript-7guis",
   "version": "0.0.0",
+  "type": "module",
   "private": true,
   "license": "MIT",
   "author": {
@@ -8,15 +9,17 @@
     "email": "hey@hyeseong.kim"
   },
   "scripts": {
-    "serve": "serve",
+    "test": "uvu tasks",
     "build": "rescript",
-    "watch": "rescript build -w"
+    "watch": "rescript build -w",
+    "serve": "serve"
   },
   "dependencies": {
     "rescript": "^10.0.1"
   },
   "devDependencies": {
-    "serve": "^14.1.1"
+    "serve": "^14.1.1",
+    "uvu": "^0.5.6"
   },
   "packageManager": "yarn@3.2.4"
 }

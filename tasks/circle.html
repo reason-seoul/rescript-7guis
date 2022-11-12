@@ -1,0 +1,115 @@
+<div class="container">
+  <div class="controls">
+    <button id="undo">Undo</button>
+    <button id="redo">Redo</button>
+  </div>
+
+  <canvas id="canvas" width="300" height="300"></canvas>
+
+  <dialog>
+    <p></p>
+    <input type="range" min="0" max="100">
+    <button>Close</button>
+  </dialog>
+</div>
+
+<script type="importmap">
+  {
+    "imports": {
+      "rescript/": "/node_modules/rescript/"
+    }
+  }
+</script>
+
+<script type="module">
+  import { CircleDrawer, Circle } from './circle.bs.js';
+
+  let $canvas = document.getElementById('canvas');
+  let $undo = document.getElementById('undo');
+  let $redo = document.getElementById('redo');
+  let $dialog = document.querySelector('dialog');
+  let $dialogContent = $dialog.querySelector('p');
+  let $dialogCloseButton = $dialog.querySelector('button');
+  let $circleSizer = $dialog.querySelector('input[type=range]');
+
+  let ctx = $canvas.getContext('2d');
+
+  let bind = state => {
+    let entries = CircleDrawer.State.getEntries(state)
+    let changingEntry = CircleDrawer.State.getChangingEntry(state);
+
+    $undo.disabled = !CircleDrawer.State.canUndo(state);
+    $redo.disabled = !CircleDrawer.State.canRedo(state);
+
+    if (changingEntry) {
+      let { circle } = changingEntry;
+      $circleSizer.value = circle.radius;
+      $dialogContent.innerText = `Adjust diameter of circle at (${circle.center.x}, ${circle.center.y}).`;
+      $dialog.open = true;
+
+    }
+
+    ctx.clearRect(0, 0, 300, 300);
+
+    for (const { circle, selected, disabled } of entries) {
+      if (disabled) continue;
+
+      let { x, y, width, height } = Circle.toRect(circle)
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, height, circle.radius);
+      ctx.stroke();
+      if (selected) {
+        ctx.fillStyle = 'gray';
+        ctx.fill();
+      }
+    }
+  };
+
+  let program = CircleDrawer.make(bind);
+  CircleDrawer.init(program);
+
+  $canvas.onmousemove = e => {
+    let point = { x: e.offsetX, y: e.offsetY };
+    program = CircleDrawer.mousemove(program, point);
+  };
+
+  $canvas.onclick = () => {
+    program = CircleDrawer.click(program);
+  };
+
+  $circleSizer.oninput = e => {
+    let radius = e.currentTarget.valueAsNumber;
+    program = CircleDrawer.changeRadius(program, radius);
+  };
+
+  $dialogCloseButton.onclick = () => {
+    program = CircleDrawer.confirm(program);
+    $dialog.open = false;
+  };
+
+  $undo.onclick = () => {
+    program = CircleDrawer.undo(program);
+  };
+
+  $redo.onclick = () => {
+    program = CircleDrawer.redo(program);
+  };
+</script>
+
+<style>
+  .container {
+    display: grid;
+    grid-template-columns: max-content;
+    gap: 0.5rem;
+  }
+
+  .controls {
+    display: inline-flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  canvas {
+    border: 1px solid #000;
+  }
+</style>
