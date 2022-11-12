@@ -1,0 +1,118 @@
+<div>
+  <div>
+    <label>
+      Filter prefix:
+      <input id="filter" type="text">
+    </label>
+  </div>
+
+  <div class="container">
+    <select id="entries" size="6"></select>
+
+    <fieldset class="controls">
+      <label>
+        Name: <input id="name" type="text" required>
+      </label>
+      <label>
+        Surname: <input id="surname" type="text" required>
+      </label>
+    </fieldset>
+  </div>
+
+  <div class="btn-group">
+    <button id="create">Create</button>
+    <button id="update">Update</button>
+    <button id="delete">Delete</button>
+  </div>
+</div>
+
+<script type="importmap">
+  {
+    "imports": {
+      "rescript/": "/node_modules/rescript/"
+    }
+  }
+</script>
+
+<script type="module">
+  import { CRUD } from './crud.bs.js';
+
+  let $entries = document.getElementById('entries');
+  let $filter = document.getElementById('filter');
+  let $name = document.getElementById('name');
+  let $surname = document.getElementById('surname');
+  let $create = document.getElementById('create');
+  let $update = document.getElementById('update');
+  let $delete = document.getElementById('delete');
+
+  let bind = state => {
+    let { filter, name, surname, selected } = state;
+    let filteredEntries = CRUD.State.getFilteredEntries(state);
+
+    let fragment = new DocumentFragment();
+    for (const entry of filteredEntries) {
+      const option = document.createElement('option');
+      option.value = entry.id;
+      option.innerText = CRUD.Util.getFullname(entry);
+      option.selected = selected?.id === entry.id;
+      fragment.appendChild(option);
+    }
+    $entries.innerText = '';
+    $entries.append(fragment);
+
+    $filter.value = filter;
+    $name.value = name;
+    $surname.value = surname;
+  };
+
+  let program = CRUD.make(bind);
+  CRUD.init(program);
+
+  $entries.onchange = e => {
+    let id = e.currentTarget.value;
+    program = CRUD.selectEntry(program, +id);
+  }
+
+  $filter.oninput = e => {
+    let filter = e.currentTarget.value;
+    program = CRUD.changeFilter(program, filter);
+  };
+
+  $name.onchange = e => {
+    let name = e.currentTarget.value;
+    program = CRUD.changeName(program, name);
+  };
+
+  $surname.onchange = e => {
+    let surname = e.currentTarget.value;
+    program = CRUD.changeSurname(program, surname);
+  };
+
+  $create.onclick = () => {
+    program = CRUD.createEntry(program);
+  };
+
+  $update.onclick = () => {
+    program = CRUD.updateEntry(program);
+  };
+
+  $delete.onclick = () => {
+    program = CRUD.deleteEntry(program);
+  };
+</script>
+
+<style>
+  select {
+    width: 20rem;
+  }
+
+  .container {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+  }
+
+  .controls label {
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
