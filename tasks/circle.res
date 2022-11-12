@@ -214,18 +214,18 @@ module CircleDrawer = {
           })
         }
 
-      | (Idle(data), Undo) if state->State.canUndo => {
+      | (Idle(data), Undo) if data->Data.canUndo => {
           let {backward, forward} = data
           let (backward, forward) = backward->Util.transferHead(forward)
           let backward = backward->Util.enableLastEntry
           Idle({...data, backward, forward})
         }
 
-      | (Idle(data), Redo) if state->State.canRedo => {
+      | (Idle(data), Redo) if data->Data.canRedo => {
           let {backward, forward} = data
           let backward = switch (backward, forward) {
-          | (list{backwardLast, ..._}, list{forwardLast, ..._})
-            if backwardLast.id == forwardLast.id =>
+          | (list{backwardEntry, ..._}, list{forwardEntry, ..._})
+            if backwardEntry.id == forwardEntry.id =>
             backward->Util.disableLastEntry
 
           | _ => backward
