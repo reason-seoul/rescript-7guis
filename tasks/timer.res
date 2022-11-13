@@ -1,10 +1,10 @@
-type data = {
+type context = {
   capturedTime: int,
   totalElapsedTime: int,
   duration: int,
 }
 
-type state = Idle(data) | Running(data) | Done(data)
+type state = Idle(context) | Running(context) | Done(context)
 
 type action =
   | Tick({currentTime: int})
@@ -40,14 +40,14 @@ module Timer = {
     }
 
     let getTotalElapsedTime = state => {
-      let Idle(data) | Running(data) | Done(data) = state
-      let {totalElapsedTime} = data
+      let Idle(context) | Running(context) | Done(context) = state
+      let {totalElapsedTime} = context
       totalElapsedTime
     }
 
     let getDuration = state => {
-      let Idle(data) | Running(data) | Done(data) = state
-      let {duration} = data
+      let Idle(context) | Running(context) | Done(context) = state
+      let {duration} = context
       duration
     }
   }
@@ -66,32 +66,32 @@ module Timer = {
       let elapsedTime = currentTime - capturedTime
       let nextTotalElapsedTime = totalElapsedTime + elapsedTime
       let done = nextTotalElapsedTime >= duration
-      let data = {
+      let context = {
         capturedTime: currentTime,
         totalElapsedTime: done ? totalElapsedTime : nextTotalElapsedTime,
         duration,
       }
-      done ? Done(data) : Running(data)
+      done ? Done(context) : Running(context)
     }
 
     let reduce = (state, action) => {
       switch (state, action) {
-      | (Idle(data), Tick({currentTime})) =>
-        deriveState(currentTime, {...data, capturedTime: currentTime})
-      | (Running(data), Tick({currentTime})) => deriveState(currentTime, data)
-      | (Running(data) | Done(data), Reset({currentTime})) =>
+      | (Idle(context), Tick({currentTime})) =>
+        deriveState(currentTime, {...context, capturedTime: currentTime})
+      | (Running(context), Tick({currentTime})) => deriveState(currentTime, context)
+      | (Running(context) | Done(context), Reset({currentTime})) =>
         deriveState(
           currentTime,
           {
-            ...data,
+            ...context,
             totalElapsedTime: 0,
           },
         )
-      | (Running(data) | Done(data), ChangeDuration({currentTime, duration})) =>
+      | (Running(context) | Done(context), ChangeDuration({currentTime, duration})) =>
         deriveState(
           currentTime,
           {
-            ...data,
+            ...context,
             duration,
           },
         )

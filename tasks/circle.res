@@ -51,7 +51,7 @@ type entry = {
   circle: Circle.t,
 }
 
-type data = {
+type context = {
   id_seq: int,
   mouse: Point.t,
   backward: list<entry>,
@@ -59,9 +59,9 @@ type data = {
 }
 
 type state =
-  | Idle(data)
-  | Hover({entry: entry, data: data})
-  | Focus({entry: entry, changed: entry, data: data})
+  | Idle(context)
+  | Hover({entry: entry, context: context})
+  | Focus({entry: entry, changed: entry, context: context})
 
 type action =
   | ChangeRadius(int)
@@ -100,13 +100,13 @@ module CircleDrawer = {
     }
   }
 
-  module Data = {
-    let canUndo = data => {
-      data.backward->Belt.List.length != 0
+  module Context = {
+    let canUndo = ctx => {
+      ctx.backward->Belt.List.length != 0
     }
 
-    let canRedo = data => {
-      data.forward->Belt.List.length != 0
+    let canRedo = ctx => {
+      ctx.forward->Belt.List.length != 0
     }
 
     let getNearestEntry = ({mouse, backward: entries}) => {
@@ -120,8 +120,8 @@ module CircleDrawer = {
       ->List.head
     }
 
-    let getHoveringEntry = data => {
-      switch (data, data->getNearestEntry) {
+    let getHoveringEntry = context => {
+      switch (context, context->getNearestEntry) {
       | ({mouse}, Some(entry)) if entry.circle->Circle.includes(mouse) => Some(entry)
       | _ => None
       }
@@ -130,13 +130,13 @@ module CircleDrawer = {
 
   module State = {
     let canUndo = state => {
-      let Idle(data) | Hover({data}) | Focus({data}) = state
-      data->Data.canUndo
+      let Idle(context) | Hover({context}) | Focus({context}) = state
+      context->Context.canUndo
     }
 
     let canRedo = state => {
-      let Idle(data) | Hover({data}) | Focus({data}) = state
-      data->Data.canRedo
+      let Idle(context) | Hover({context}) | Focus({context}) = state
+      context->Context.canRedo
     }
 
     let getChangingEntry = state => {
@@ -147,8 +147,8 @@ module CircleDrawer = {
     }
 
     let getEntries = state => {
-      let Idle(data) | Hover({data}) | Focus({data}) = state
-      data.backward->Belt.List.toArray
+      let Idle(context) | Hover({context}) | Focus({context}) = state
+      context.backward->Belt.List.toArray
     }
   }
 
@@ -167,10 +167,10 @@ module CircleDrawer = {
       open Belt
 
       switch (state, action) {
-      | (Idle(data) | Hover({data}), MouseMove(mouse)) => {
-          let data = {...data, mouse}
-          let {backward} = data
-          let hoveringEntry = data->Data.getHoveringEntry
+      | (Idle(context) | Hover({context}), MouseMove(mouse)) => {
+          let context = {...context, mouse}
+          let {backward} = context
+          let hoveringEntry = context->Context.getHoveringEntry
           let backward = backward->Belt.List.map(entry =>
             switch (hoveringEntry, entry) {
             | (Some(hoveringEntry), entry) if entry.id == hoveringEntry.id => {
@@ -180,18 +180,18 @@ module CircleDrawer = {
             | (_, entry) => {...entry, selected: false}
             }
           )
-          let data = {
-            ...data,
+          let context = {
+            ...context,
             backward,
           }
           switch hoveringEntry {
-          | Some(entry) => Hover({entry, data})
-          | None => Idle(data)
+          | Some(entry) => Hover({entry, context})
+          | None => Idle(context)
           }
         }
 
-      | (Idle(data), Click) => {
-          let {id_seq, backward, mouse} = data
+      | (Idle(context), Click) => {
+          let {id_seq, backward, mouse} = context
           let {x, y} = mouse
           let id = id_seq + 1
           let entry = {
@@ -205,8 +205,8 @@ module CircleDrawer = {
           }
           Hover({
             entry,
-            data: {
-              ...data,
+            context: {
+              ...context,
               id_seq: id,
               forward: list{},
               backward: backward->List.add(entry),
@@ -214,15 +214,15 @@ module CircleDrawer = {
           })
         }
 
-      | (Idle(data), Undo) if data->Data.canUndo => {
-          let {backward, forward} = data
+      | (Idle(context), Undo) if context->Context.canUndo => {
+          let {backward, forward} = context
           let (backward, forward) = backward->Util.transferHead(forward)
           let backward = backward->Util.enableLastEntry
-          Idle({...data, backward, forward})
+          Idle({...context, backward, forward})
         }
 
-      | (Idle(data), Redo) if data->Data.canRedo => {
-          let {backward, forward} = data
+      | (Idle(context), Redo) if context->Context.canRedo => {
+          let {backward, forward} = context
           let backward = switch (backward, forward) {
           | (list{backwardEntry, ..._}, list{forwardEntry, ..._})
             if backwardEntry.id == forwardEntry.id =>
@@ -231,13 +231,13 @@ module CircleDrawer = {
           | _ => backward
           }
           let (forward, backward) = forward->Util.transferHead(backward)
-          Idle({...data, backward, forward})
+          Idle({...context, backward, forward})
         }
 
-      | (Hover({entry, data}), Click) => Focus({entry, changed: entry, data})
+      | (Hover({entry, context}), Click) => Focus({entry, changed: entry, context})
 
-      | (Focus({entry: focusing, data}), ChangeRadius(radius)) => {
-          let {backward} = data
+      | (Focus({entry: focusing, context}), ChangeRadius(radius)) => {
+          let {backward} = context
           let changed = {...focusing, circle: {...focusing.circle, radius}}
           let backward = backward->List.map(entry =>
             switch entry {
@@ -245,16 +245,16 @@ module CircleDrawer = {
             | _ => entry
             }
           )
-          Focus({entry: focusing, changed, data: {...data, backward}})
+          Focus({entry: focusing, changed, context: {...context, backward}})
         }
 
-      | (Focus({entry, changed, data}), Confirm) => {
-          let backward = switch data.backward {
+      | (Focus({entry, changed, context}), Confirm) => {
+          let backward = switch context.backward {
           | list{changed, ...backward} =>
             backward->List.add(entry)->Util.disableLastEntry->List.add(changed)
           | backward => backward
           }
-          Hover({entry: changed, data: {...data, backward}})
+          Hover({entry: changed, context: {...context, backward}})
         }
 
       | _ => state
