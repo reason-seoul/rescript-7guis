@@ -7,14 +7,10 @@ module Point = {
   let distance = (p1, p2) => {
     open Belt
 
-    let x1 = p1.x->Int.toFloat
-    let y1 = p1.y->Int.toFloat
+    let dx = p1.x - p2.x
+    let dy = p1.y - p2.y
 
-    let x2 = p2.x->Int.toFloat
-    let y2 = p2.y->Int.toFloat
-
-    open Js.Math
-    (pow_float(~base=x2 -. x1, ~exp=2.) +. pow_float(~base=y2 -. y1, ~exp=2.))->Js.Math.sqrt
+    Js.Math.sqrt((dx * dx + dy * dy)->Int.toFloat)
   }
 }
 
@@ -39,8 +35,12 @@ module Circle = {
   }
 
   let toRect = ({center, radius}) => {
-    open Rect
-    {x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2}
+    {
+      Rect.x: center.x - radius,
+      y: center.y - radius,
+      width: radius * 2,
+      height: radius * 2,
+    }
   }
 }
 
@@ -72,12 +72,9 @@ type action =
   | Redo
 
 module CircleDrawer = {
+  let defaultRadius = 10
+
   module Util = {
-    let defaultRadus = 10
-
-    let arrayToList = arr => arr->Belt.List.fromArray
-    let listToArray = list => list->Belt.List.toArray
-
     let transferHead = (this, other) => {
       switch this {
       | list{head, ...this} => (this, list{head, ...other})
@@ -109,22 +106,9 @@ module CircleDrawer = {
       ctx.forward->Belt.List.length != 0
     }
 
-    let getNearestEntry = ({mouse, backward: entries}) => {
-      open Belt
-      entries
-      ->List.sort((a, b) => {
-        let a_dist = a.circle.center->Point.distance(mouse)
-        let b_dist = b.circle.center->Point.distance(mouse)
-        (a_dist -. b_dist)->Int.fromFloat
-      })
-      ->List.head
-    }
-
     let getHoveringEntry = context => {
-      switch (context, context->getNearestEntry) {
-      | ({mouse}, Some(entry)) if entry.circle->Circle.includes(mouse) => Some(entry)
-      | _ => None
-      }
+      let {mouse, backward} = context
+      backward->Belt.List.getBy(entry => entry.circle->Circle.includes(mouse))
     }
   }
 
@@ -200,7 +184,7 @@ module CircleDrawer = {
             disabled: false,
             circle: {
               center: {x, y},
-              radius: Util.defaultRadus,
+              radius: defaultRadius,
             },
           }
           Hover({
