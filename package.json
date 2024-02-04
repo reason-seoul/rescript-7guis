@@ -1,6 +1,6 @@
 {
   "name": "rescript-7guis",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "private": true,
   "license": "MIT",
@@ -15,10 +15,10 @@
     "serve": "serve"
   },
   "dependencies": {
-    "rescript": "^10.0.1"
+    "rescript": "^11.0.1"
   },
   "devDependencies": {
-    "serve": "^14.1.1",
+    "serve": "^14.2.1",
     "uvu": "^0.5.6"
   },
   "packageManager": "yarn@3.2.4"
