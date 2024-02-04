@@ -121,9 +121,13 @@ module CRUD = {
     {...program, state}
   }
 
-  let updateEntry = (program, id) => {
-    let state = program->dispatch(UpdateEntry(id))
-    {...program, state}
+  let updateEntry = (program) => {
+    switch program.state.selected {
+      | None => program
+      | Some(entry) => 
+        let state = program->dispatch(UpdateEntry(entry.id))
+        {...program, state}
+    }
   }
 
   let selectEntry = (program, id) => {
@@ -131,9 +135,13 @@ module CRUD = {
     {...program, state}
   }
 
-  let deleteEntry = (program, id) => {
-    let state = program->dispatch(DeleteEntry(id))
-    {...program, state}
+  let deleteEntry = (program) => {
+    switch program.state.selected {
+      | None => program
+      | Some(entry) => 
+        let state = program->dispatch(DeleteEntry(entry.id))
+        {...program, state}
+    }
   }
 
   let changeName = (program, name) => {
