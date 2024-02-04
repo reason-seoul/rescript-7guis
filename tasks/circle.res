@@ -5,8 +5,6 @@ module Point = {
   }
 
   let distance = (p1, p2) => {
-    open Belt
-
     let dx = p1.x - p2.x
     let dy = p1.y - p2.y
 
@@ -148,8 +146,6 @@ module CircleDrawer = {
     })
 
     let reduce = (state, action) => {
-      open Belt
-
       switch (state, action) {
       | (Idle(context) | Hover({context}), MouseMove(mouse)) => {
           let context = {...context, mouse}

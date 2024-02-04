@@ -13,13 +13,14 @@
 <script type="importmap">
   {
     "imports": {
-      "rescript/": "/node_modules/rescript/"
+      "rescript/": "/node_modules/rescript/",
+      "@rescript/": "/node_modules/@rescript/"
     }
   }
 </script>
 
 <script type="module">
-  import { FlightBooker, Field } from './flight.bs.js';
+  import { FlightBooker, Field } from './flight.res.js';
 
   let $form = document.querySelector('form');
   let $type = document.getElementById('type');

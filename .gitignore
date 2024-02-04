@@ -3,6 +3,7 @@
 *.log
 *.lock
 *.bs.js
+*.res.js
 
 node_modules/
 lib/

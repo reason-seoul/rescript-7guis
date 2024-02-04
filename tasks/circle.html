@@ -16,13 +16,14 @@
 <script type="importmap">
   {
     "imports": {
-      "rescript/": "/node_modules/rescript/"
+      "rescript/": "/node_modules/rescript/",
+      "@rescript/": "/node_modules/@rescript/"
     }
   }
 </script>
 
 <script type="module">
-  import { CircleDrawer, Circle } from './circle.bs.js';
+  import { CircleDrawer, Circle } from './circle.res.js';
 
   let $canvas = document.getElementById('canvas');
   let $undo = document.getElementById('undo');

@@ -53,7 +53,6 @@ module CRUD = {
     }
 
     let reduce = (state, action) => {
-      open Belt
       switch (state, action) {
       | ({id_seq, name, surname, entries}, CreateEntry) => {
           let id = id_seq + 1
@@ -86,7 +85,7 @@ module CRUD = {
       | ({entries}, DeleteEntry(id)) => {
           let state = {
             ...state,
-            entries: entries->Array.keep(entry =>
+            entries: entries->Belt.Array.keep(entry =>
               switch entry {
               | entry if entry.id == id => false
               | _ => true
@@ -122,9 +121,13 @@ module CRUD = {
     {...program, state}
   }
 
-  let updateEntry = (program, id) => {
-    let state = program->dispatch(UpdateEntry(id))
-    {...program, state}
+  let updateEntry = (program) => {
+    switch program.state.selected {
+      | None => program
+      | Some(entry) => 
+        let state = program->dispatch(UpdateEntry(entry.id))
+        {...program, state}
+    }
   }
 
   let selectEntry = (program, id) => {
@@ -132,9 +135,13 @@ module CRUD = {
     {...program, state}
   }
 
-  let deleteEntry = (program, id) => {
-    let state = program->dispatch(DeleteEntry(id))
-    {...program, state}
+  let deleteEntry = (program) => {
+    switch program.state.selected {
+      | None => program
+      | Some(entry) => 
+        let state = program->dispatch(DeleteEntry(entry.id))
+        {...program, state}
+    }
   }
 
   let changeName = (program, name) => {

@@ -1,7 +1,7 @@
 import { test } from 'uvu';
 import * as assert from 'uvu/assert';
 
-import { CircleDrawer } from './circle.bs.js';
+import { CircleDrawer } from './circle.res.js';
 
 test('transferHead', () => {
   let { transferHead, arrayToList, listToArray } = CircleDrawer.Util;

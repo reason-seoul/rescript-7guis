@@ -13,13 +13,14 @@
 <script type="importmap">
   {
     "imports": {
-      "rescript/": "/node_modules/rescript/"
+      "rescript/": "/node_modules/rescript/",
+      "@rescript/": "/node_modules/@rescript/"
     }
   }
 </script>
 
 <script type="module">
-  import { Timer } from './timer.bs.js';
+  import { Timer } from './timer.res.js';
 
   let $slider = document.getElementById('slider');
   let $time = document.getElementById('time');
