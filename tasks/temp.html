@@ -9,13 +9,14 @@
 <script type="importmap">
   {
     "imports": {
-      "rescript/": "/node_modules/rescript/"
+      "rescript/": "/node_modules/rescript/",
+      "@rescript/": "/node_modules/@rescript/"
     }
   }
 </script>
 
 <script type="module">
-  import { TemperatureConverter } from './temp.bs.js';
+  import { TemperatureConverter } from './temp.res.js';
 
   let $ce = document.getElementById('ce');
   let $fa = document.getElementById('fa');

@@ -16,12 +16,10 @@ module Timer = {
     let maxDuration = 60 * 1000
 
     let durationToPercent = duration => {
-      open Belt
       (Int.toFloat(duration) /. Int.toFloat(maxDuration) *. 100.)->Int.fromFloat
     }
 
     let percentToDuration = pct => {
-      open Belt
       (pct /. 100. *. Int.toFloat(maxDuration))->Int.fromFloat
     }
 

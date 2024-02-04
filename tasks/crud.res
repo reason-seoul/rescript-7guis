@@ -53,7 +53,6 @@ module CRUD = {
     }
 
     let reduce = (state, action) => {
-      open Belt
       switch (state, action) {
       | ({id_seq, name, surname, entries}, CreateEntry) => {
           let id = id_seq + 1
@@ -86,7 +85,7 @@ module CRUD = {
       | ({entries}, DeleteEntry(id)) => {
           let state = {
             ...state,
-            entries: entries->Array.keep(entry =>
+            entries: entries->Belt.Array.keep(entry =>
               switch entry {
               | entry if entry.id == id => false
               | _ => true

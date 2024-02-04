@@ -6,13 +6,14 @@
 <script type="importmap">
   {
     "imports": {
-      "rescript/": "/node_modules/rescript/"
+      "rescript/": "/node_modules/rescript/",
+      "@rescript/": "/node_modules/@rescript/"
     }
   }
 </script>
 
 <script type="module">
-  import { Counter } from './counter.bs.js';
+  import { Counter } from './counter.res.js';
 
   let $count = document.getElementById('count');
   let $increase = document.getElementById('increase');
